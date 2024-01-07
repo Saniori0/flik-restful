@@ -98,9 +98,7 @@ class Router
         $route = new Route(new Path($path), $callback, $this);
         $route->setOptions($options);
 
-        $this->routes[] = $route;
-
-        return $route;
+        return $this->routes[] = $route;
 
     }
 
@@ -117,11 +115,7 @@ class Router
 
             $routePath = $route->getPath();
 
-            if (!$queryPath->isMatchWith($routePath)) {
-
-                continue;
-
-            }
+            if (!$queryPath->isMatchWith($routePath)) continue;
 
             $paramIndexes = $routePath->getParams();
             $paramValue = $queryPath->getParams();

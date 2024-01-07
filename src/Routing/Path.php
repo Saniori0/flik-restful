@@ -42,7 +42,7 @@ class Path
     public function isMatchWith(string $otherPath): bool
     {
 
-        return preg_match($this->getRegex(), $otherPath);
+        return preg_match($this->generateRegexFromPathString(), $otherPath);
 
     }
 
@@ -52,7 +52,7 @@ class Path
      *
      * @return string
      */
-    public function getRegex(): string
+    public function generateRegexFromPathString(): string
     {
 
         $pathEscapedSlash = str_replace("/", "\/", $this->pathString);
@@ -128,11 +128,7 @@ class Path
 
             preg_match_all("/^([a-zA-Z0-9а-яёА-ЯЁ]+)@([a-zA-Z0-9а-яёА-ЯЁ]+)->([a-zA-Z0-9а-яёА-ЯЁ]+)$/", $param, $matches);
 
-            if (count($matches[2]) <= 0) {
-
-                continue;
-
-            }
+            if (count($matches[2]) <= 0) continue;
 
             $hooks[str_replace("@" . $matches[2][0] . "->" . $matches[3][0], "", $param)] = [
                 "hookName" => $matches[2][0],

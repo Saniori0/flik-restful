@@ -18,7 +18,7 @@ class PreparedRoute
 
     public function getParams(): object
     {
-        return (object) $this->params;
+        return (object)$this->params;
     }
 
     /**
@@ -45,11 +45,7 @@ class PreparedRoute
 
         $hooks = $this->getRoute()->getPath()->getHooks();
 
-        if (count($hooks) <= 0) {
-
-            return;
-
-        }
+        if (count($hooks) <= 0) return;
 
         $params = [];
 
