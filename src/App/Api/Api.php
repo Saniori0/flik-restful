@@ -8,15 +8,14 @@ use Flik\Backend\App\AbstractApp;
 class Api extends AbstractApp
 {
 
-    public function __construct(protected readonly Router $router = new Router())
+    public function __construct(public readonly Router $router = new Router())
     {
-
     }
 
-    public function getRouter(): Router
+    public function dispatch()
     {
 
-        return $this->router;
+        // TODO Implement method
 
     }
 

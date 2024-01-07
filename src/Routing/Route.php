@@ -3,55 +3,42 @@
 
 namespace Flik\Backend\Routing;
 
+use Closure;
+
 class Route
 {
 
     private array $options = [];
-    private array $params = [];
 
-    public function __construct(private string $path, private \Closure $callback)
+    /**
+     * @param Path $path Path
+     * @param Closure $callback
+     * @param Router $parent The router through which it was created
+     */
+    public function __construct(private readonly Path $path, private readonly Closure $callback, public readonly Router $parent)
     {
     }
 
-    public function setOptions(array $options)
+    /**
+     * Options can be used when it is necessary to add separate method processing. For example, JWT authorization or captcha.
+     * @param array $options
+     * @return void
+     */
+    public function setOptions(array $options): void
     {
 
         $this->options = $options;
 
     }
 
-    public function execute(mixed $data = []): mixed
+    public function getPath(): Path
     {
-
-        $callback = $this->callback;
-
-        return $callback((object)[
-            "route" => $this,
-            "summoner" => $data,
-        ]);
-
+        return $this->path;
     }
 
-    public function setParam(string $key, string $value)
+    public function getCallback(): Closure
     {
-        $this->params[$key] = $value;
-        return $this;
-    }
-
-    public function setParams(array $params): Route
-    {
-        $this->params = $params;
-        return $this;
-    }
-
-    public function getParam(string $key): string
-    {
-        return $this->params[$key];
-    }
-
-    public function getParams(): object
-    {
-        return (object)$this->params;
+        return $this->callback;
     }
 
 }

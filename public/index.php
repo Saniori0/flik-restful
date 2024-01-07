@@ -6,6 +6,9 @@ use Flik\Backend\App\Api\Api;
 
 $app = new Api();
 
-$app->getRouter()->controller("\\Flik\\Backend\\App\\Api\\Dev\\Controllers\\ToDo");
+$app->router->controller("\\Flik\\Backend\\App\\Api\\Dev\\Controllers\\ToDo");
 
-// Test
+$app->dispatch();
+
+// TODO Review hook and controller systems, add more tests
+// TODO Lastly write volumetric documentation for Router

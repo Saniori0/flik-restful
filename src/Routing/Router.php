@@ -3,16 +3,15 @@
 
 namespace Flik\Backend\Routing;
 
+use ArgumentCountError;
 use Closure;
 use ReflectionClass;
+use ReflectionMethod;
+use TypeError;
 
 /**
  * A regular router. Can be used in models.
  * U can connect controllers if desired.
- * Used in App\Api\Router.
- *
- * It could be implemented with "interlayer" between Router and Routes.
- * But for the sake of simplicity, I limited myself to a simple array of Routes.
  */
 class Router
 {
@@ -26,27 +25,6 @@ class Router
     {
     }
 
-    /**
-     * Creates a route.
-     * See Routing\Route
-     * @param string $path
-     * @param Closure $callback
-     * @param array $options see Routing\Route::Options
-     * @return Route
-     */
-    public function route(string $path, Closure $callback, array $options = []): Route
-    {
-
-        $path = trim($path, "/");
-
-        $route = new Route($path, $callback);
-        $route->setOptions($options);
-
-        $this->routes[$path] = $route;
-
-        return $route;
-
-    }
 
     /**
      * Connects the controller using class extending Routing\AbstractController
@@ -65,7 +43,7 @@ class Router
         if (!($controller instanceof AbstractController)) return;
 
         $reflection = new ReflectionClass($controller);
-        $staticReflectionMethods = $reflection->getMethods(\ReflectionMethod::IS_STATIC);
+        $staticReflectionMethods = $reflection->getMethods(ReflectionMethod::IS_STATIC);
 
         foreach ($staticReflectionMethods as $reflectionMethod) {
 
@@ -86,9 +64,9 @@ class Router
                         $path = $arguments[1];
                         $options = $arguments[2];
 
-                        if (!isset($path, $options)) throw new \ArgumentCountError("Controller {{$controllerName}} -> Route {{$reflectionMethod->getName()}()}");
-                        if (!is_string($path)) throw new \TypeError("Controller {{$controllerName}} -> Route {{$reflectionMethod->getName()}()} Path must be string");
-                        if (!is_array($options)) throw new \TypeError("Controller {{$controllerName}} -> Route {{$reflectionMethod->getName()}()} Options must be array");
+                        if (!isset($path, $options)) throw new ArgumentCountError("Controller {{$controllerName}} -> Route {{$reflectionMethod->getName()}()}");
+                        if (!is_string($path)) throw new TypeError("Controller {{$controllerName}} -> Route {{$reflectionMethod->getName()}()} Path must be string");
+                        if (!is_array($options)) throw new TypeError("Controller {{$controllerName}} -> Route {{$reflectionMethod->getName()}()} Options must be array");
 
                         $Route = $this->route($path, $methodClosure, $options);
 
@@ -107,115 +85,57 @@ class Router
     }
 
     /**
-     * @param string $query path of routes
-     * @return Route|null
+     * Creates a route.
+     * See Routing\Route
+     * @param string $path
+     * @param Closure $callback
+     * @param array $options see Routing\Route::Options
+     * @return Route
      */
-    public function findRouteByQuery(string $query): ?Route
+    public function route(string $path, Closure $callback, array $options = []): Route
     {
 
-        $query = trim($query, "/");
+        $route = new Route(new Path($path), $callback, $this);
+        $route->setOptions($options);
 
-        $explodedQueryBySlash = explode("/", $query);
-        $countExplodedQueryBySlash = count($explodedQueryBySlash);
+        $this->routes[] = $route;
 
-        $routes = $this->routes;
+        return $route;
 
-        foreach ($routes as $routePath => $route) {
+    }
 
-            $explodedPathBySlash = explode("/", $routePath);
-            $countExplodedPathBySlash = count($explodedPathBySlash);
+    /**
+     * @param string $query
+     * @return PreparedRoute|null
+     */
+    public function findRouteByQuery(string $query): ?PreparedRoute
+    {
 
-            if ($countExplodedQueryBySlash != $countExplodedPathBySlash) {
+        $queryPath = new Path($query);
 
-                $route = null;
+        foreach ($this->routes as $route) {
+
+            $routePath = $route->getPath();
+
+            if (!$queryPath->isMatchWith($routePath)) {
+
                 continue;
 
             }
 
-            foreach ($explodedPathBySlash as $index => $pathValue) {
+            $paramIndexes = $routePath->getParams();
+            $paramValue = $queryPath->getParams();
 
-                $queryValue = $explodedQueryBySlash[$index];
+            $params = array_combine($paramIndexes, $paramValue);
 
-                if (!$queryValue) {
+            $preparedRoute = new PreparedRoute($route);
+            $preparedRoute->setParams($params);
 
-                    break;
-
-                }
-
-                if ($pathValue[0] == ":") {
-
-                    if ($queryValue[0] != ":") {
-
-                        $route = null;
-                        break;
-
-                    }
-
-                    $pathValue = ltrim($pathValue, ":");
-                    $queryValue = ltrim($queryValue, ":");
-
-                    $paramIndex = $pathValue;
-
-                    if (str_contains($pathValue, "@")) {
-
-                        $explodedPathValueByAt = explode("@", $pathValue);
-                        $paramIndex = $explodedPathValueByAt[0];
-
-                        if (count($explodedPathValueByAt) == 2) {
-
-                            $hook = $explodedPathValueByAt[1];
-
-                            if (mb_strlen($hook) > 0) {
-
-                                $explodeHookByArrow = explode("->", $hook);
-
-                                $hookHead = $explodeHookByArrow[0];
-                                $hookBody = $explodeHookByArrow[1];
-
-                                $Hook = $this->hooker->find($hookHead);
-
-                                if($Hook){
-
-                                    $queryValue = $Hook->execute($hookBody, $queryValue);
-
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                    $route->setParam($paramIndex, $queryValue);
-
-                    if ($index == ($countExplodedPathBySlash - 1)) {
-
-                        return $route;
-
-                    }
-
-                    continue;
-
-                }
-
-                if ($pathValue != $queryValue) {
-
-                    $route = null;
-                    break;
-
-                }
-
-                if ($index == $countExplodedPathBySlash - 1) {
-
-                    return $route;
-
-                }
-
-            }
+            return $preparedRoute;
 
         }
 
-        return $route;
+        return null;
 
     }
 

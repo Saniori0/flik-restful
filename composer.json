@@ -1,19 +1,19 @@
 {
-    "name": "flik/backend",
-    "description": "Flik api v0.1",
-    "type": "project",
-    "autoload": {
-        "psr-4": {
-            "Flik\\Backend\\": "src/"
-        }
-    },
-    "authors": [
-        {
-            "name": "saniori",
-            "email": "rodion2992@gmail.com"
-        }
-    ],
-    "require": {
-      "ext-mbstring": "*"
+  "name": "flik/backend",
+  "description": "Flik api v0.1",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "Flik\\Backend\\": "src/"
     }
+  },
+  "authors": [
+    {
+      "name": "saniori",
+      "email": "rodion2992@gmail.com"
+    }
+  ],
+  "require": {
+    "ext-mbstring": "*"
+  }
 }

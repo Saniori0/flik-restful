@@ -6,21 +6,21 @@ namespace Composer\Autoload;
 
 class ComposerStaticInit6859efd96f121a38de6284f94bc391d4
 {
-    public static $prefixLengthsPsr4 = array (
-        'F' => 
-        array (
-            'Flik\\Backend\\' => 13,
-        ),
+    public static $prefixLengthsPsr4 = array(
+        'F' =>
+            array(
+                'Flik\\Backend\\' => 13,
+            ),
     );
 
-    public static $prefixDirsPsr4 = array (
-        'Flik\\Backend\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src',
-        ),
+    public static $prefixDirsPsr4 = array(
+        'Flik\\Backend\\' =>
+            array(
+                0 => __DIR__ . '/../..' . '/src',
+            ),
     );
 
-    public static $classMap = array (
+    public static $classMap = array(
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
